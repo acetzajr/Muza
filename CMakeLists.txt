@@ -1,0 +1,12 @@
+
+cmake_minimum_required(VERSION 3.28)
+project(Muza)
+file(GLOB_RECURSE Muza_SRC "src/*.cpp")
+add_executable(Muza ${Muza_SRC})
+target_compile_options(Muza PRIVATE -Wall -Wextra -Wpedantic)
+target_include_directories(Muza PRIVATE "inc")
+set_property(TARGET Muza PROPERTY CXX_STANDARD 26)
+find_package(Boost 1.83)
+target_include_directories(Muza PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(Muza PRIVATE /usr/include/opus /usr/include/x86_64-linux-gnu )
+target_link_libraries(Muza PRIVATE asound sndfile fftw3 m)
