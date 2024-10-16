@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <thread>
 namespace muza {
-Midi::Midi(const char *device) {
+Midi::Midi(const char *device) : running(true) {
   midi = nullptr;
   int code = snd_rawmidi_open(&midi, nullptr, device, 0);
   if (code < 0) {
@@ -28,7 +28,7 @@ Midi::~Midi() {
   }
 }
 void Midi::thread() {
-  while (isRunning()) {
+  while (running.get()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(25));
     // std::cout << "running\n";
     int count = snd_rawmidi_read(midi, &buffer, sizeof(buffer));
@@ -37,16 +37,6 @@ void Midi::thread() {
     }
   }
 }
-void Midi::terminate() {
-  mutex.lock();
-  running = false;
-  mutex.unlock();
-}
-bool Midi::isRunning() {
-  bool running;
-  mutex.lock();
-  running = this->running;
-  mutex.unlock();
-  return running;
-}
+void Midi::terminate() { running.set(false); }
+
 } // namespace muza

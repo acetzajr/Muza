@@ -1,7 +1,7 @@
 #pragma once
+#include "muza/tsbool.hpp"
 #include "muza/types.hpp"
 #include <alsa/asoundlib.h>
-#include <mutex>
 namespace muza {
 class Midi {
 public:
@@ -9,12 +9,10 @@ public:
   ~Midi();
   void thread();
   void terminate();
-  bool isRunning();
 
 private:
-  bool running = true;
+  TSBool running;
   byte buffer[1024];
-  std::mutex mutex;
   snd_rawmidi_t *midi;
 };
 } // namespace muza
