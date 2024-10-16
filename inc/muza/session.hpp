@@ -15,5 +15,4 @@ public:
   std::thread audioThread;
   std::thread midiThread;
 };
-extern Session session;
 } // namespace muza

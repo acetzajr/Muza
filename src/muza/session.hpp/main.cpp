@@ -3,7 +3,6 @@
 #include "muza/session.hpp"
 #include <iostream>
 namespace muza {
-Session session = Session();
 Session::Session()
     : audio(), midi("hw:3,0,0"), audioThread(&Audio::thread, &audio),
       midiThread(&Midi::thread, &midi) {
