@@ -10,7 +10,8 @@
 #include <stdexcept>
 #include <thread>
 namespace muza {
-Midi::Midi(const char *device) : running(true) {
+Midi::Midi(TSQueue<Message *> *queue, const char *device)
+    : pusher(queue), running(true) {
   midi = nullptr;
   int code = snd_rawmidi_open(&midi, nullptr, device, 0);
   if (code < 0) {
@@ -52,13 +53,13 @@ int Midi::getChannel(unsigned char *message) {
 int Midi::getKey(unsigned char *message) { return message[1]; }
 int Midi::getVelocity(unsigned char *message) { return message[2]; }
 void Midi::sendNoteOff(unsigned char *message) {
-  queue.push(NoteOffMessage(getKey(message), getVelocity(message)));
+  pusher.push(new NoteOffMessage(getKey(message), getVelocity(message)));
 }
 void Midi::sendNoteOn(unsigned char *message) {
-  queue.push(NoteOnMessage(getKey(message), getVelocity(message)));
+  pusher.push(new NoteOnMessage(getKey(message), getVelocity(message)));
 }
-void Midi::sendPedalOff() { queue.push(PedalOffMessage()); }
-void Midi::sendPedalOn() { queue.push(PedalOnMessage()); }
+void Midi::sendPedalOff() { pusher.push(new PedalOffMessage()); }
+void Midi::sendPedalOn() { pusher.push(new PedalOnMessage()); }
 void Midi::printMessage(unsigned char *message) {
   std::cout << "Message: ";
   std::cout << "[" << std::bitset<8>(message[0]) << "]";

@@ -1,8 +1,8 @@
 #pragma once
 #include "muza/messages/message.hpp"
 namespace muza {
-class PedalMessage : public Message {
+class ExitMessage : public Message {
 public:
-  PedalMessage();
+  ExitMessage();
 };
 } // namespace muza

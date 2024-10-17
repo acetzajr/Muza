@@ -1,9 +1,14 @@
 #pragma once
-#include "muza/messages/noteMessage.hpp"
+#include "muza/messages/message.hpp"
 namespace muza {
-class NoteOffMessage : public NoteMessage {
+class NoteOffMessage : public Message {
 public:
   NoteOffMessage(int key, int velocity);
-  virtual MessageType type() override;
+  int getKey();
+  int getVelocity();
+
+private:
+  int key;
+  int velocity;
 };
 } // namespace muza

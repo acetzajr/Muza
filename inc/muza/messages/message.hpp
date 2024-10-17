@@ -1,16 +1,13 @@
 #pragma once
 namespace muza {
-enum class MessageType {
-  Message,
-  Note,
-  NoteOff,
-  NoteOn,
-  Pedal,
-  PedalOff,
-  PedalOn
-};
+enum class MessageType { Exit, Message, NoteOff, NoteOn, PedalOff, PedalOn };
 class Message {
 public:
-  virtual MessageType type();
+  Message(MessageType type);
+  ~Message();
+  MessageType getType();
+
+protected:
+  MessageType type;
 };
 } // namespace muza

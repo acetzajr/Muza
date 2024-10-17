@@ -1,8 +1,8 @@
 #pragma once
-#include "muza/messages/pedalMessage.hpp"
+#include "muza/messages/message.hpp"
 namespace muza {
-class PedalOffMessage : public PedalMessage {
+class PedalOffMessage : public Message {
 public:
-  virtual MessageType type() override;
+  PedalOffMessage();
 };
 } // namespace muza

@@ -1,8 +1,7 @@
-#include "muza/messages/message.hpp"
-#include "muza/messages/noteMessage.hpp"
 #include "muza/messages/noteOffMessage.hpp"
 namespace muza {
 NoteOffMessage::NoteOffMessage(int key, int velocity)
-    : NoteMessage(key, velocity) {}
-MessageType NoteOffMessage::type() { return MessageType::NoteOff; }
+    : Message(MessageType::NoteOff), key(key), velocity(velocity) {}
+int NoteOffMessage::getKey() { return key; }
+int NoteOffMessage::getVelocity() { return velocity; }
 } // namespace muza

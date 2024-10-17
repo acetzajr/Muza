@@ -1,4 +1,6 @@
 #include "muza/messages/message.hpp"
 namespace muza {
-MessageType Message::type() { return MessageType::Message; }
+Message::Message(MessageType type) : type(type) {}
+Message::~Message() {}
+MessageType Message::getType() { return type; }
 } // namespace muza

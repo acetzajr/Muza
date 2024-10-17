@@ -5,7 +5,8 @@
 #include <stdexcept>
 #include <vector>
 namespace muza {
-Audio::Audio() : index(0), running(true) {
+Audio::Audio(TSQueue<Buffer *> *queue)
+    : index(0), pusher(queue), running(true) {
   int code = snd_pcm_open(&handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
   if (code < 0) {
     throw std::runtime_error(snd_strerror(code));
@@ -43,7 +44,7 @@ void Audio::terminate() { running.set(false); }
 void Audio::request(Buffer *buffer) {
   buffer->copyTo(this->buffer);
   buffer->use();
-  queue.push(buffer);
+  pusher.push(buffer);
   ++index;
   index %= buffers.size();
 }

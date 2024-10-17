@@ -1,12 +1,13 @@
 #pragma once
 #include "muza/messages/message.hpp"
 #include "muza/tsBool.hpp"
+#include "muza/tsPush.hpp"
 #include "muza/tsQueue.hpp"
 #include <alsa/asoundlib.h>
 namespace muza {
 class Midi {
 public:
-  Midi(const char *device);
+  Midi(TSQueue<Message *> *queue, const char *device);
   ~Midi();
   void thread();
   void terminate();
@@ -23,7 +24,7 @@ private:
   void sendPedalOn();
 
 private:
-  TSQueue<Message> queue;
+  TSPush<Message *> pusher;
   TSBool running;
   unsigned char buffer[1024];
   snd_rawmidi_t *midi;

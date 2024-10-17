@@ -1,13 +1,14 @@
 #pragma once
 #include "muza/buffer.hpp"
 #include "muza/tsBool.hpp"
+#include "muza/tsPush.hpp"
 #include "muza/tsQueue.hpp"
 #include <alsa/asoundlib.h>
 #include <vector>
 namespace muza {
 class Audio {
 public:
-  Audio();
+  Audio(TSQueue<Buffer *> *queue);
   ~Audio();
   void thread();
   void terminate();
@@ -18,7 +19,7 @@ private:
 
 private:
   int index;
-  TSQueue<Buffer *> queue;
+  TSPush<Buffer *> pusher;
   TSBool running;
   std::vector<Buffer> buffers;
   Buffer buffer;
