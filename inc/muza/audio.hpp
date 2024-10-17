@@ -1,7 +1,7 @@
 #pragma once
 #include "muza/buffer.hpp"
-#include "muza/tsbool.hpp"
-#include "muza/tsqueue.hpp"
+#include "muza/tsBool.hpp"
+#include "muza/tsQueue.hpp"
 #include <alsa/asoundlib.h>
 #include <vector>
 namespace muza {

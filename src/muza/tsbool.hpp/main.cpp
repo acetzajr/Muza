@@ -1,4 +1,4 @@
-#include "muza/tsbool.hpp"
+#include "muza/tsBool.hpp"
 namespace muza {
 TSBool::TSBool(bool value) : value(value) {}
 bool TSBool::get() {

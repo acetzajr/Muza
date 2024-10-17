@@ -1,6 +1,5 @@
 #pragma once
-#include "muza/tsbool.hpp"
-#include "muza/types.hpp"
+#include "muza/tsBool.hpp"
 #include <alsa/asoundlib.h>
 namespace muza {
 class Midi {
@@ -11,8 +10,11 @@ public:
   void terminate();
 
 private:
+  void process(unsigned char *message);
+
+private:
   TSBool running;
-  byte buffer[1024];
+  unsigned char buffer[1024];
   snd_rawmidi_t *midi;
 };
 } // namespace muza

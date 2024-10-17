@@ -4,7 +4,7 @@
 #include <iostream>
 namespace muza {
 Session::Session()
-    : audio(), midi("hw:3,0,0"), audioThread(&Audio::thread, &audio),
+    : audio(), midi("hw:1,0,0"), audioThread(&Audio::thread, &audio),
       midiThread(&Midi::thread, &midi) {
   std::cout << "Session started\n";
 }

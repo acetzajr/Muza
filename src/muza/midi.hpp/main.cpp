@@ -1,4 +1,5 @@
 #include "muza/midi.hpp"
+#include <bitset>
 #include <chrono>
 #include <iostream>
 #include <stdexcept>
@@ -32,11 +33,25 @@ void Midi::thread() {
     std::this_thread::sleep_for(std::chrono::milliseconds(25));
     // std::cout << "running\n";
     int count = snd_rawmidi_read(midi, &buffer, sizeof(buffer));
-    if (count >= 0) {
-      std::cout << count << "\n";
+    int index{0};
+    while (count > 0) {
+      process(&buffer[index]);
+      index += 3;
+      count -= 3;
     }
   }
 }
+void Midi::process(unsigned char *message) {
+  int channel = message[0] & 0b0000'1111;
+  if (channel != 0) {
+    return;
+  }
+  std::cout << "Message: ";
+  std::cout << "[" << std::bitset<8>(message[0]) << "]";
+  std::cout << "[" << std::bitset<8>(message[1]) << "]";
+  std::cout << "[" << std::bitset<8>(message[2]) << "]";
+  std::cout << "\n";
+  std::cout << "channel: " << channel << "\n";
+}
 void Midi::terminate() { running.set(false); }
-
 } // namespace muza
