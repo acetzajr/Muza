@@ -11,6 +11,7 @@ Session::Session()
 Session::~Session() {
   midi.terminate();
   midiThread.join();
+  audio.terminate();
   audioThread.join();
   std::cout << "Session ended.\n";
 }
