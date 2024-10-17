@@ -1,5 +1,7 @@
 #pragma once
+#include "muza/messages/message.hpp"
 #include "muza/tsBool.hpp"
+#include "muza/tsQueue.hpp"
 #include <alsa/asoundlib.h>
 namespace muza {
 class Midi {
@@ -10,9 +12,18 @@ public:
   void terminate();
 
 private:
+  void printMessage(unsigned char *message);
   void process(unsigned char *message);
+  void sendNoteOff(unsigned char *message);
+  void sendNoteOn(unsigned char *message);
+  int getChannel(unsigned char *message);
+  int getKey(unsigned char *message);
+  int getVelocity(unsigned char *message);
+  void sendPedalOff();
+  void sendPedalOn();
 
 private:
+  TSQueue<Message> queue;
   TSBool running;
   unsigned char buffer[1024];
   snd_rawmidi_t *midi;
