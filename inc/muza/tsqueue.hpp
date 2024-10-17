@@ -14,10 +14,8 @@ private:
   std::condition_variable condition;
 };
 template <class T> void TSQueue<T>::push(T item) {
-  {
-    std::unique_lock<std::mutex> lock(mutex);
-    queue.push(item);
-  }
+  std::unique_lock<std::mutex> lock(mutex);
+  queue.push(item);
   condition.notify_one();
 }
 template <class T> T TSQueue<T>::pop() {

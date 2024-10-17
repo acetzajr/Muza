@@ -1,5 +1,7 @@
 #pragma once
+#include "muza/buffer.hpp"
 #include "muza/tsbool.hpp"
+#include "muza/tsqueue.hpp"
 #include <alsa/asoundlib.h>
 #include <vector>
 namespace muza {
@@ -11,8 +13,16 @@ public:
   void terminate();
 
 private:
+  Buffer *getBuffer();
+  void request(Buffer *buffer);
+
+private:
+  int index;
+  TSQueue<Buffer *> queue;
   TSBool running;
-  std::vector<float> buffer;
+  std::vector<Buffer> buffers;
+  Buffer buffer;
+  Buffer guardBuffer;
   snd_pcm_t *handle;
   snd_pcm_uframes_t bufferSize;
   snd_pcm_uframes_t periodSize;
