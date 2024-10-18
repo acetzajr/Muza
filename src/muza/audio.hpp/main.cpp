@@ -23,11 +23,11 @@ Audio::Audio(TSQueue<Buffer *> *queue)
   }
   std::cout << "Buffer size: " << bufferSize << "\n";
   // std::cout << "Period size: " << periodSize << "\n";
-  guardBuffer = Buffer(bufferSize);
-  buffer = Buffer(bufferSize);
+  guardBuffer.resize(bufferSize);
+  buffer.resize(bufferSize);
   buffers = std::vector<Buffer>(3);
   for (unsigned long i = 0; i < buffers.size(); ++i) {
-    buffers[i] = Buffer(bufferSize);
+    buffers[i].resize(bufferSize);
   }
 }
 Audio::~Audio() {

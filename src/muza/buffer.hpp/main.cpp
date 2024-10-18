@@ -1,9 +1,19 @@
 #include "muza/buffer.hpp"
 #include <stdexcept>
 namespace muza {
-Buffer::Buffer(int frames) : samples(frames * 2, 0), ready(true) {}
-bool Buffer::isReady() { return ready; }
-void Buffer::use() { ready = false; }
+Buffer::Buffer() : ready(true) {}
+Buffer::Buffer(int frames)
+    : frames(frames), samples(frames * 2, 0), ready(true) {}
+void Buffer::resize(int frames) { samples.resize(frames, 0); }
+bool Buffer::isReady() { return ready.get(); }
+int Buffer::getFrames() { return frames; }
+void Buffer::use() {
+  ready.set(false);
+  for (auto &sample : samples) {
+    sample = 0;
+  }
+}
+void Buffer::setReady() { ready.set(true); }
 const void *Buffer::data() { return samples.data(); }
 int Buffer::size() { return samples.size(); }
 void Buffer::copyTo(Buffer &buffer) {
