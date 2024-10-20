@@ -1,6 +1,7 @@
 #include "muza/audio.hpp"
 #include "muza/buffer.hpp"
 #include <alsa/pcm.h>
+#include <cstdio>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -13,7 +14,7 @@ Audio::Audio(TSQueue<Buffer *> *queue)
   }
   code =
       snd_pcm_set_params(handle, SND_PCM_FORMAT_FLOAT,
-                         SND_PCM_ACCESS_RW_INTERLEAVED, 2, 48'000, 1, 10'000);
+                         SND_PCM_ACCESS_RW_INTERLEAVED, 2, 48'000, 1, 25'000);
   if (code < 0) {
     throw std::runtime_error(snd_strerror(code));
   }
@@ -47,20 +48,26 @@ void Audio::request(Buffer *buffer) {
   pusher.push(buffer);
   ++index;
   index %= buffers.size();
+  /// std::cout << index << "\n";
 }
 Buffer *Audio::getBuffer() {
   Buffer *current = &buffers[index];
+  // std::cout << current << "\n";
   if (current->isReady()) {
+    // std::cout << "ready\n";
     request(current);
-    return &buffer;
   }
-  return &guardBuffer;
+  return &buffer;
 }
 void Audio::thread() {
   while (running.get()) {
     Buffer *buffer = getBuffer();
+    // buffer->print();
+    //  buffer->print();
     snd_pcm_sframes_t count =
         snd_pcm_writei(handle, buffer->data(), bufferSize);
+    // std::cout << count << "\n";
+    // std::cout << buffer << "\n";
     if (count < 0) {
       count = snd_pcm_recover(handle, count, 0);
     }

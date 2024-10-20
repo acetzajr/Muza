@@ -15,7 +15,6 @@ void errorCallback(RtMidiError::Type type, const std::string &errorText,
 class Midi {
 public:
   Midi(TSQueue<Message *> *queue);
-  ~Midi();
   void thread();
   void terminate();
   void process(unsigned char *message);

@@ -1,10 +1,10 @@
 #include "muza/synths/acetzaSy/keyState.hpp"
-#include <iostream>
+// #include <iostream>
 #include <mutex>
 namespace muza::acetzaSy {
 KeyState::KeyState() {}
 void KeyState::press(int velocity) {
-  std::cout << "Press\n";
+  // std::cout << "Press\n";
   std::unique_lock<std::mutex> lock(mutex);
   this->velocity = velocity;
   phase = KeyPhase::Attack;

@@ -15,6 +15,7 @@ public:
   void setReady();
   const void *data();
   float &operator[](int index);
+  void print();
 
 private:
   int frames;

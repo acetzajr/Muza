@@ -1,11 +1,12 @@
 #include "muza/buffer.hpp"
+#include <iostream>
 #include <stdexcept>
 namespace muza {
 Buffer::Buffer() : ready(true) {}
 Buffer::Buffer(int frames)
     : frames(frames), samples(frames * 2, 0), ready(true) {}
 void Buffer::resize(int frames) {
-  samples.resize(frames, 0);
+  samples.resize(frames * 2, 0);
   this->frames = frames;
 }
 bool Buffer::isReady() { return ready.get(); }
@@ -13,7 +14,7 @@ int Buffer::getFrames() { return frames; }
 void Buffer::use() {
   ready.set(false);
   for (auto &sample : samples) {
-    sample = 0;
+    sample = 0.0f;
   }
 }
 void Buffer::setReady() { ready.set(true); }
@@ -33,5 +34,9 @@ float &Buffer::operator[](int index) {
   }
   return samples[index];
 }
-
+void Buffer::print() {
+  for (auto &sample : samples) {
+    std::cout << sample << "\n";
+  }
+}
 } // namespace muza

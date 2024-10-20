@@ -28,7 +28,6 @@ Midi::Midi(TSQueue<Message *> *queue) : midiIn(), pusher(queue), running(true) {
   }
   midiIn.openPort(1);
 }
-Midi::~Midi() {}
 void Midi::thread() {}
 int Midi::getChannel(unsigned char *message) {
   return message[0] & 0b0000'1111;
@@ -73,5 +72,5 @@ void Midi::process(unsigned char *message) {
     break;
   }
 }
-void Midi::terminate() { running.set(false); }
+void Midi::terminate() { midiIn.closePort(); }
 } // namespace muza

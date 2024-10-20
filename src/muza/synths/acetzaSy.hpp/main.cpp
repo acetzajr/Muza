@@ -25,7 +25,8 @@ void AcetzaSy::bufferThread() {
     int frames = buffer->getFrames();
     for (int key = 0; key < (int)states.size(); ++key) {
       acetzaSy::KeyState &state = states[key];
-      if (state.getPhase() == acetzaSy::KeyPhase::Idle) {
+      if (state.getPhase() == acetzaSy::KeyPhase::Idle ||
+          state.getPhase() == acetzaSy::KeyPhase::Release) {
         continue;
       }
       int index{0};
@@ -35,11 +36,11 @@ void AcetzaSy::bufferThread() {
         float time = frameToTime(frame, 48'000);
         part = std::fmod(time * scale.frequencyOf(key), 1.0f);
         float sample = muza::sin(initialPart + part) * 0.5f;
-        // std::cout << index << "\n"; // 3110
+        // std::cout << sample << "\n"; // 3110
         (*buffer)[index++] += sample;
         (*buffer)[index++] += sample;
       }
-      state.setPart(initialPart + part);
+      // state.setPart(initialPart + part);
     }
     buffer->setReady();
   }
