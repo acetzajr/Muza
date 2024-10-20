@@ -7,7 +7,6 @@
 #include "muza/synths/acetzaSy/keyState.hpp"
 #include "muza/waveForms.hpp"
 #include <cmath>
-#include <iostream>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -15,7 +14,7 @@ namespace muza {
 AcetzaSy::AcetzaSy(TSQueue<Message *> *messages, TSQueue<Buffer *> *buffers)
     : messages(messages), buffers(buffers) {}
 void AcetzaSy::processThread(int index) {
-  std::cout << "processThread " << index << "\n";
+  // std::cout << "processThread " << index << "\n";
   TSQueue<KeyMessage> &keyQueue = keyQueues[index];
   while (true) {
     KeyMessage keyMessage = keyQueue.pop();
@@ -48,7 +47,7 @@ void AcetzaSy::bufferThread() {
     Buffer *buffer = buffers.pop();
     // std::cout << "buffer received\n";
     if (buffer == nullptr) {
-      return;
+      break;
     }
     for (int key = 0, processCount = 0; key < (int)states.size(); ++key) {
       acetzaSy::KeyState &state = states[key];
@@ -73,7 +72,10 @@ void AcetzaSy::bufferThread() {
     }
     buffer->setReady();
   }
-  for (auto &thread : processThreads) {
+  for (auto &keyQueue : keyQueues) {
+    keyQueue.push(KeyMessage{nullptr, -1});
+  }
+  for (auto *thread : processThreads) {
     thread->join();
     delete thread;
   }
