@@ -25,21 +25,24 @@ void AcetzaSy::bufferThread() {
     int frames = buffer->getFrames();
     for (int key = 0; key < (int)states.size(); ++key) {
       acetzaSy::KeyState &state = states[key];
+      std::unique_lock<std::mutex> lock(*state.getMutex());
       if (state.getPhase() == acetzaSy::KeyPhase::Idle ||
           state.getPhase() == acetzaSy::KeyPhase::Release) {
         continue;
       }
       int index{0};
-      float initialPart{state.getPart()};
       float part{0};
-      for (int frame = 0; frame < frames; ++frame) {
+      unsigned long long frame = state.getFrame();
+      unsigned long long endFrame = frame + frames;
+      for (; frame < endFrame; ++frame) {
         float time = frameToTime(frame, 48'000);
         part = std::fmod(time * scale.frequencyOf(key), 1.0f);
-        float sample = muza::sin(initialPart + part) * 0.5f;
+        float sample = muza::sqr(part) * 0.10f;
         // std::cout << sample << "\n"; // 3110
         (*buffer)[index++] += sample;
         (*buffer)[index++] += sample;
       }
+      state.setFrame(frame);
       // state.setPart(initialPart + part);
     }
     buffer->setReady();
@@ -52,7 +55,7 @@ void AcetzaSy::thread() {
   bool running = true;
   while (running) {
     std::unique_ptr<Message> message(messages.pop());
-    std::cout << "Message received\n";
+    // std::cout << "Message received\n";
     switch (message->getType()) {
     case MessageType::Exit:
       running = false;

@@ -4,11 +4,12 @@
 #include "muza/tsPush.hpp"
 #include "muza/tsQueue.hpp"
 #include <alsa/asoundlib.h>
+#include <sndfile.h>
 #include <vector>
 namespace muza {
 class Audio {
 public:
-  Audio(TSQueue<Buffer *> *queue);
+  Audio(TSQueue<Buffer *> *queue, bool save = false);
   ~Audio();
   void thread();
   void terminate();
@@ -27,5 +28,7 @@ private:
   snd_pcm_t *handle;
   snd_pcm_uframes_t bufferSize;
   snd_pcm_uframes_t periodSize;
+  bool save;
+  SNDFILE *file;
 };
 } // namespace muza

@@ -6,7 +6,7 @@
 #include <iostream>
 namespace muza {
 Session::Session()
-    : audio(&buffers), midi(&messages), synth(&messages, &buffers),
+    : audio(&buffers, true), midi(&messages), synth(&messages, &buffers),
       audioThread(&Audio::thread, &audio), midiThread(&Midi::thread, &midi),
       synthThread(&AcetzaSy::thread, &synth) {
   std::cout << "Session started\n";
