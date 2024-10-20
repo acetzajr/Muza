@@ -21,9 +21,8 @@ void AcetzaSy::processThread(int index) {
     int key = keyMessage.key;
     Buffer *buffer = keyMessage.buffer;
     acetzaSy::KeyState &state = states[keyMessage.key];
-    std::unique_lock<std::mutex> lock(*state.getMutex());
-    float part{0};
     unsigned long long frame = state.getFrame();
+    float part{0};
     unsigned long long endFrame = frame + buffer->getFrames();
     for (int index = 0; frame < endFrame; ++frame) {
       float time = frameToTime(frame, 48'000);
@@ -48,12 +47,9 @@ void AcetzaSy::bufferThread() {
     }
     for (int key = 0, processCount = 0; key < (int)states.size(); ++key) {
       acetzaSy::KeyState &state = states[key];
-      {
-        std::unique_lock<std::mutex> lock(*state.getMutex());
-        if (state.getPhase() == acetzaSy::KeyPhase::Idle ||
-            state.getPhase() == acetzaSy::KeyPhase::Release) {
-          continue;
-        }
+      if (state.getPhase() == acetzaSy::KeyPhase::Idle ||
+          state.getPhase() == acetzaSy::KeyPhase::Release) {
+        continue;
       }
       keyQueues[processCount++].push(KeyMessage{buffer, key});
       while (processCount > 0) {
