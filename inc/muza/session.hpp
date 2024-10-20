@@ -1,7 +1,7 @@
 #pragma once
 #include "muza/audio.hpp"
-#include "muza/messages/message.hpp"
 #include "muza/midi.hpp"
+#include "muza/midiMessage.hpp"
 #include "muza/synths/acetzaSy.hpp"
 #include "muza/tsQueue.hpp"
 #include <thread>
@@ -14,7 +14,7 @@ public:
 
 public:
   TSQueue<Buffer *> buffers;
-  TSQueue<Message *> messages;
+  TSQueue<MidiMessage> messages;
   Audio audio;
   Midi midi;
   AcetzaSy synth;

@@ -1,6 +1,6 @@
 #pragma once
 #include "RtMidi.h"
-#include "muza/messages/message.hpp"
+#include "muza/midiMessage.hpp"
 #include "muza/tsBool.hpp"
 #include "muza/tsPush.hpp"
 #include "muza/tsQueue.hpp"
@@ -14,7 +14,7 @@ void errorCallback(RtMidiError::Type type, const std::string &errorText,
 } // namespace midi
 class Midi {
 public:
-  Midi(TSQueue<Message *> *queue);
+  Midi(TSQueue<MidiMessage> *queue);
   void thread();
   void terminate();
   void process(unsigned char *message);
@@ -31,7 +31,7 @@ private:
 
 private:
   RtMidiIn midiIn;
-  TSPush<Message *> pusher;
+  TSPush<MidiMessage> pusher;
   TSBool running;
   unsigned char buffer[1024];
   snd_rawmidi_t *midi;

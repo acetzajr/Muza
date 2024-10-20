@@ -1,6 +1,6 @@
 #include "muza/audio.hpp"
-#include "muza/messages/exitMessage.hpp"
 #include "muza/midi.hpp"
+#include "muza/midiMessage.hpp"
 #include "muza/session.hpp"
 #include "muza/synths/acetzaSy.hpp"
 #include <iostream>
@@ -18,7 +18,7 @@ void Session::wait() {
 Session::~Session() {
   // messages.push(new NoteOnMessage(1, 2));
   buffers.push(nullptr);
-  messages.push(new ExitMessage());
+  messages.push(MidiMessage{MidiMessageType::Exit, NoteMessage{}});
   synthThread.join();
   midi.terminate();
   audio.terminate();

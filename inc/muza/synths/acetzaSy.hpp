@@ -1,6 +1,6 @@
 #pragma once
 #include "muza/buffer.hpp"
-#include "muza/messages/message.hpp"
+#include "muza/midiMessage.hpp"
 #include "muza/scale.hpp"
 #include "muza/synths/acetzaSy/keyState.hpp"
 #include "muza/tsPop.hpp"
@@ -11,7 +11,7 @@
 namespace muza {
 class AcetzaSy {
 public:
-  AcetzaSy(TSQueue<Message *> *messages, TSQueue<Buffer *> *buffers);
+  AcetzaSy(TSQueue<MidiMessage> *messages, TSQueue<Buffer *> *buffers);
   void thread();
   void bufferThread();
   void processThread(int index);
@@ -39,7 +39,7 @@ private:
   bool pedal{false};
   std::array<acetzaSy::KeyState, 128> states;
   Scale scale;
-  TSPop<Message *> messages;
+  TSPop<MidiMessage> messages;
   TSPop<Buffer *> buffers;
 };
 } // namespace muza

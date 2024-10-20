@@ -1,17 +1,14 @@
 #include "muza/buffer.hpp"
 #include "muza/frameRate.hpp"
-#include "muza/messages/message.hpp"
-#include "muza/messages/noteOffMessage.hpp"
-#include "muza/messages/noteOnMessage.hpp"
+#include "muza/midiMessage.hpp"
 #include "muza/synths/acetzaSy.hpp"
 #include "muza/synths/acetzaSy/keyState.hpp"
 #include "muza/waveForms.hpp"
 #include <cmath>
-#include <memory>
 #include <mutex>
 #include <thread>
 namespace muza {
-AcetzaSy::AcetzaSy(TSQueue<Message *> *messages, TSQueue<Buffer *> *buffers)
+AcetzaSy::AcetzaSy(TSQueue<MidiMessage> *messages, TSQueue<Buffer *> *buffers)
     : messages(messages), buffers(buffers) {}
 void AcetzaSy::processThread(int index) {
   // std::cout << "processThread " << index << "\n";
@@ -19,7 +16,7 @@ void AcetzaSy::processThread(int index) {
   while (true) {
     KeyMessage keyMessage = keyQueue.pop();
     if (keyMessage.buffer == nullptr) {
-      return;
+      break;
     }
     int key = keyMessage.key;
     Buffer *buffer = keyMessage.buffer;
@@ -82,30 +79,24 @@ void AcetzaSy::bufferThread() {
 }
 void AcetzaSy::thread() {
   std::thread bufferThread(&AcetzaSy::bufferThread, this);
-  NoteOnMessage *noteOnMessage;
-  NoteOffMessage *noteOffMessage;
   bool running = true;
   while (running) {
-    std::unique_ptr<Message> message(messages.pop());
+    MidiMessage message = messages.pop();
     // std::cout << "Message received\n";
-    switch (message->getType()) {
-    case MessageType::Exit:
+    switch (message.type) {
+    case MidiMessageType::Exit:
       running = false;
       break;
-    case MessageType::Message:
+    case MidiMessageType::NoteOff:
+      noteOff(message.noteMessage.key);
       break;
-    case MessageType::NoteOff:
-      noteOffMessage = (NoteOffMessage *)message.get();
-      noteOff(noteOffMessage->getKey());
+    case MidiMessageType::NoteOn:
+      noteOn(message.noteMessage.key, message.noteMessage.velocity);
       break;
-    case MessageType::NoteOn:
-      noteOnMessage = (NoteOnMessage *)message.get();
-      noteOn(noteOnMessage->getKey(), noteOnMessage->getVelocity());
-      break;
-    case MessageType::PedalOff:
+    case MidiMessageType::PedalOff:
       pedalOff();
       break;
-    case MessageType::PedalOn:
+    case MidiMessageType::PedalOn:
       pedalOn();
       break;
     }

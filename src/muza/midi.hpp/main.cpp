@@ -1,10 +1,6 @@
 #include "RtMidi.h"
-#include "muza/messages/message.hpp"
-#include "muza/messages/noteOffMessage.hpp"
-#include "muza/messages/noteOnMessage.hpp"
-#include "muza/messages/pedalOffMessage.hpp"
-#include "muza/messages/pedalOnMessage.hpp"
 #include "muza/midi.hpp"
+#include "muza/midiMessage.hpp"
 #include <alsa/rawmidi.h>
 #include <bitset>
 #include <iostream>
@@ -20,7 +16,8 @@ void errorCallback(RtMidiError::Type, const std::string &errorText, void *) {
   throw std::runtime_error(errorText);
 }
 } // namespace midi
-Midi::Midi(TSQueue<Message *> *queue) : midiIn(), pusher(queue), running(true) {
+Midi::Midi(TSQueue<MidiMessage> *queue)
+    : midiIn(), pusher(queue), running(true) {
   midiIn.setErrorCallback(midi::errorCallback);
   midiIn.setCallback(midi::callback, this);
   for (int i = 0; i < (int)midiIn.getPortCount(); ++i) {
@@ -35,13 +32,19 @@ int Midi::getChannel(unsigned char *message) {
 int Midi::getKey(unsigned char *message) { return message[1]; }
 int Midi::getVelocity(unsigned char *message) { return message[2]; }
 void Midi::sendNoteOff(unsigned char *message) {
-  pusher.push(new NoteOffMessage(getKey(message), getVelocity(message)));
+  pusher.push(MidiMessage{MidiMessageType::NoteOff,
+                          NoteMessage{getKey(message), getVelocity(message)}});
 }
 void Midi::sendNoteOn(unsigned char *message) {
-  pusher.push(new NoteOnMessage(getKey(message), getVelocity(message)));
+  pusher.push(MidiMessage{MidiMessageType::NoteOn,
+                          NoteMessage{getKey(message), getVelocity(message)}});
 }
-void Midi::sendPedalOff() { pusher.push(new PedalOffMessage()); }
-void Midi::sendPedalOn() { pusher.push(new PedalOnMessage()); }
+void Midi::sendPedalOff() {
+  pusher.push(MidiMessage{MidiMessageType::PedalOff, NoteMessage{}});
+}
+void Midi::sendPedalOn() {
+  pusher.push(MidiMessage{MidiMessageType::PedalOn, NoteMessage{}});
+}
 void Midi::printMessage(unsigned char *message) {
   std::cout << "Message: ";
   std::cout << "[" << std::bitset<8>(message[0]) << "]";
