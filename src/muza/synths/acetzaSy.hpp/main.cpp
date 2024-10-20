@@ -7,7 +7,6 @@
 #include "muza/synths/acetzaSy/keyState.hpp"
 #include "muza/waveForms.hpp"
 #include <cmath>
-#include <iostream>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -15,7 +14,6 @@ namespace muza {
 AcetzaSy::AcetzaSy(TSQueue<Message *> *messages, TSQueue<Buffer *> *buffers)
     : messages(messages), buffers(buffers) {}
 void AcetzaSy::bufferThread() {
-  std::cout << "bufferThread\n";
   while (true) {
     Buffer *buffer = buffers.pop();
     // std::cout << "buffer received\n";
@@ -37,7 +35,7 @@ void AcetzaSy::bufferThread() {
       for (; frame < endFrame; ++frame) {
         float time = frameToTime(frame, 48'000);
         part = std::fmod(time * scale.frequencyOf(key), 1.0f);
-        float sample = muza::sqr(part) * 0.10f;
+        float sample = muza::saw(part) * 0.10f;
         // std::cout << sample << "\n"; // 3110
         (*buffer)[index++] += sample;
         (*buffer)[index++] += sample;

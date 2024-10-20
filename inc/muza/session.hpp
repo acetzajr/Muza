@@ -19,7 +19,6 @@ public:
   Midi midi;
   AcetzaSy synth;
   std::thread audioThread;
-  std::thread midiThread;
   std::thread synthThread;
 };
 } // namespace muza

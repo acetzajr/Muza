@@ -6,8 +6,8 @@
 #include <iostream>
 namespace muza {
 Session::Session()
-    : audio(&buffers, true), midi(&messages), synth(&messages, &buffers),
-      audioThread(&Audio::thread, &audio), midiThread(&Midi::thread, &midi),
+    : audio(&buffers, false), midi(&messages), synth(&messages, &buffers),
+      audioThread(&Audio::thread, &audio),
       synthThread(&AcetzaSy::thread, &synth) {
   std::cout << "Session started\n";
 }
@@ -21,7 +21,6 @@ Session::~Session() {
   messages.push(new ExitMessage());
   synthThread.join();
   midi.terminate();
-  midiThread.join();
   audio.terminate();
   audioThread.join();
   std::cout << "Session ended\n";
