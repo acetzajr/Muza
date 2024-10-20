@@ -7,43 +7,75 @@
 #include "muza/synths/acetzaSy/keyState.hpp"
 #include "muza/waveForms.hpp"
 #include <cmath>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <thread>
 namespace muza {
 AcetzaSy::AcetzaSy(TSQueue<Message *> *messages, TSQueue<Buffer *> *buffers)
     : messages(messages), buffers(buffers) {}
+void AcetzaSy::processThread(int index) {
+  std::cout << "processThread " << index << "\n";
+  TSQueue<KeyMessage> &keyQueue = keyQueues[index];
+  while (true) {
+    KeyMessage keyMessage = keyQueue.pop();
+    if (keyMessage.buffer == nullptr) {
+      return;
+    }
+    int key = keyMessage.key;
+    Buffer *buffer = keyMessage.buffer;
+    acetzaSy::KeyState &state = states[keyMessage.key];
+    std::unique_lock<std::mutex> lock(*state.getMutex());
+    float part{0};
+    unsigned long long frame = state.getFrame();
+    unsigned long long endFrame = frame + buffer->getFrames();
+    for (int index = 0; frame < endFrame; ++frame) {
+      float time = frameToTime(frame, 48'000);
+      part = std::fmod(time * scale.frequencyOf(key), 1.0f);
+      float sample = muza::saw(part) * 0.10f;
+      writeQueue.push(Write{sample, index++});
+      writeQueue.push(Write{sample, index++});
+    }
+    state.setFrame(frame);
+    writeQueue.push(Write{0, -1});
+  }
+}
 void AcetzaSy::bufferThread() {
+  for (int i = 0; i < (int)processThreads.size(); ++i) {
+    processThreads[i] = new std::thread(&AcetzaSy::processThread, this, i);
+  }
   while (true) {
     Buffer *buffer = buffers.pop();
     // std::cout << "buffer received\n";
     if (buffer == nullptr) {
       return;
     }
-    int frames = buffer->getFrames();
-    for (int key = 0; key < (int)states.size(); ++key) {
+    for (int key = 0, processCount = 0; key < (int)states.size(); ++key) {
       acetzaSy::KeyState &state = states[key];
-      std::unique_lock<std::mutex> lock(*state.getMutex());
-      if (state.getPhase() == acetzaSy::KeyPhase::Idle ||
-          state.getPhase() == acetzaSy::KeyPhase::Release) {
-        continue;
+      {
+        std::unique_lock<std::mutex> lock(*state.getMutex());
+        if (state.getPhase() == acetzaSy::KeyPhase::Idle ||
+            state.getPhase() == acetzaSy::KeyPhase::Release) {
+          continue;
+        }
       }
-      int index{0};
-      float part{0};
-      unsigned long long frame = state.getFrame();
-      unsigned long long endFrame = frame + frames;
-      for (; frame < endFrame; ++frame) {
-        float time = frameToTime(frame, 48'000);
-        part = std::fmod(time * scale.frequencyOf(key), 1.0f);
-        float sample = muza::saw(part) * 0.10f;
-        // std::cout << sample << "\n"; // 3110
-        (*buffer)[index++] += sample;
-        (*buffer)[index++] += sample;
+      keyQueues[processCount++].push(KeyMessage{buffer, key});
+      while (processCount > 0) {
+        Write write = writeQueue.pop();
+        int index = write.index;
+        if (index < 0) {
+          --processCount;
+          continue;
+        }
+        float sample = write.sample;
+        (*buffer)[index] = sample;
       }
-      state.setFrame(frame);
-      // state.setPart(initialPart + part);
     }
     buffer->setReady();
+  }
+  for (auto &thread : processThreads) {
+    thread->join();
+    delete thread;
   }
 }
 void AcetzaSy::thread() {

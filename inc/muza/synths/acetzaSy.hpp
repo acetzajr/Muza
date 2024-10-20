@@ -7,12 +7,14 @@
 #include "muza/tsQueue.hpp"
 #include <array>
 #include <mutex>
+#include <thread>
 namespace muza {
 class AcetzaSy {
 public:
   AcetzaSy(TSQueue<Message *> *messages, TSQueue<Buffer *> *buffers);
   void thread();
   void bufferThread();
+  void processThread(int index);
   void noteOn(int key, int velocity);
   void noteOff(int key);
   void pedalOn();
@@ -20,6 +22,19 @@ public:
   bool pedalState();
 
 private:
+  struct Write {
+    float sample;
+    int index;
+  };
+  struct KeyMessage {
+    Buffer *buffer;
+    int key;
+  };
+
+private:
+  std::array<TSQueue<KeyMessage>, 8> keyQueues;
+  TSQueue<Write> writeQueue;
+  std::array<std::thread *, 8> processThreads;
   std::mutex mutex;
   bool pedal{false};
   std::array<acetzaSy::KeyState, 128> states;

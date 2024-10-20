@@ -3,7 +3,7 @@
 namespace muza {
 class Scale {
 public:
-  Scale(float base = 8.0f);
+  Scale(float base = 1.0f);
   float frequencyOf(int note);
   void print();
 
