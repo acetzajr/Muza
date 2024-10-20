@@ -67,7 +67,7 @@ void AcetzaSy::bufferThread() {
           continue;
         }
         float sample = write.sample;
-        (*buffer)[index] = sample;
+        (*buffer)[index] += sample;
       }
     }
     buffer->setReady();
