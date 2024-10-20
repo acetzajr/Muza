@@ -1,52 +1,35 @@
+#include "RtMidi.h"
 #include "muza/messages/message.hpp"
 #include "muza/messages/noteOffMessage.hpp"
 #include "muza/messages/noteOnMessage.hpp"
 #include "muza/messages/pedalOffMessage.hpp"
 #include "muza/messages/pedalOnMessage.hpp"
 #include "muza/midi.hpp"
+#include <alsa/rawmidi.h>
 #include <bitset>
-#include <chrono>
 #include <iostream>
 #include <stdexcept>
-#include <thread>
 namespace muza {
-Midi::Midi(TSQueue<Message *> *queue, const char *device)
-    : pusher(queue), running(true) {
-  midi = nullptr;
-  int code = snd_rawmidi_open(&midi, nullptr, device, 0);
-  if (code < 0) {
-    throw std::runtime_error(snd_strerror(code));
-  }
-  code = snd_rawmidi_nonblock(midi, 1);
-  if (code < 0) {
-    throw std::runtime_error(snd_strerror(code));
-  }
+namespace midi {
+void callback(double, std::vector<unsigned char> *message, void *userData) {
+  // std::cout << message->size() << "\n";
+  Midi *midi = (Midi *)userData;
+  midi->process(message->data());
 }
-Midi::~Midi() {
-  if (midi != nullptr) {
-    int code = snd_rawmidi_drain(midi);
-    if (code < 0) {
-      std::cerr << snd_strerror(code);
-    }
-    code = snd_rawmidi_close(midi);
-    if (code < 0) {
-      std::cerr << snd_strerror(code);
-    }
-  }
+void errorCallback(RtMidiError::Type, const std::string &errorText, void *) {
+  throw std::runtime_error(errorText);
 }
-void Midi::thread() {
-  while (running.get()) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(25));
-    // std::cout << "running\n";
-    int count = snd_rawmidi_read(midi, &buffer, sizeof(buffer));
-    int index{0};
-    while (count > 0) {
-      process(&buffer[index]);
-      index += 3;
-      count -= 3;
-    }
+} // namespace midi
+Midi::Midi(TSQueue<Message *> *queue) : midiIn(), pusher(queue), running(true) {
+  midiIn.setErrorCallback(midi::errorCallback);
+  midiIn.setCallback(midi::callback, this);
+  for (int i = 0; i < (int)midiIn.getPortCount(); ++i) {
+    std::cout << "Port No." << i << ": " << midiIn.getPortName(i) << "\n ";
   }
+  midiIn.openPort(1);
 }
+Midi::~Midi() {}
+void Midi::thread() {}
 int Midi::getChannel(unsigned char *message) {
   return message[0] & 0b0000'1111;
 }
@@ -71,7 +54,7 @@ void Midi::process(unsigned char *message) {
   if (getChannel(message) != 0) {
     return;
   }
-  int typeCode = message[0] & 0b1111'0000;
+  int typeCode = message[0] >> 4;
   switch (typeCode) {
   case 0b1000:
     sendNoteOff(message);

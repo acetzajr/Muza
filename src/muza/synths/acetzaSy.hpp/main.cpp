@@ -35,6 +35,7 @@ void AcetzaSy::bufferThread() {
         float time = frameToTime(frame, 48'000);
         part = std::fmod(time * scale.frequencyOf(key), 1.0f);
         float sample = muza::sin(initialPart + part) * 0.5f;
+        // std::cout << index << "\n"; // 3110
         (*buffer)[index++] += sample;
         (*buffer)[index++] += sample;
       }

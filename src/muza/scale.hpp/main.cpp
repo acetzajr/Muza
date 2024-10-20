@@ -42,7 +42,7 @@ float rationalToFloat(Rational rational) {
 Scale::Scale(float base) {
   std::vector<Rational> rations(11);
   fillScale(rations);
-  printRations(rations);
+  // printRations(rations);
   int note = 10;
   float power = 1.0f;
   float sqrOfTwo = std::pow(2.0f, 1.0f / 2.0f);

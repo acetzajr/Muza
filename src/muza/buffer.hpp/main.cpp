@@ -4,7 +4,10 @@ namespace muza {
 Buffer::Buffer() : ready(true) {}
 Buffer::Buffer(int frames)
     : frames(frames), samples(frames * 2, 0), ready(true) {}
-void Buffer::resize(int frames) { samples.resize(frames, 0); }
+void Buffer::resize(int frames) {
+  samples.resize(frames, 0);
+  this->frames = frames;
+}
 bool Buffer::isReady() { return ready.get(); }
 int Buffer::getFrames() { return frames; }
 void Buffer::use() {

@@ -1,4 +1,3 @@
-#pragma once
 #include "muza/math.hpp"
 #include <cmath>
 namespace muza {
