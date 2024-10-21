@@ -15,7 +15,7 @@ Audio::Audio(TSQueue<Buffer *> *queue, bool save)
   }
   code =
       snd_pcm_set_params(handle, SND_PCM_FORMAT_FLOAT,
-                         SND_PCM_ACCESS_RW_INTERLEAVED, 2, 48'000, 1, 25'000);
+                         SND_PCM_ACCESS_RW_INTERLEAVED, 2, 48'000, 1, 10'000);
   if (code < 0) {
     throw std::runtime_error(snd_strerror(code));
   }

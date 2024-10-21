@@ -1,5 +1,4 @@
 #include "muza/buffer.hpp"
-#include "muza/fftTransforms.hpp"
 #include "muza/frameRate.hpp"
 #include "muza/midiMessage.hpp"
 #include "muza/synths/acetzaSy.hpp"
@@ -64,7 +63,7 @@ void AcetzaSy::bufferThread() {
         (*buffer)[index] += sample;
       }
     }
-    buffer->fftTransform(lowPass);
+    // buffer->fftTransform(lowCut);
     buffer->setReady();
   }
   for (auto &keyQueue : keyQueues) {
