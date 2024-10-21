@@ -1,13 +1,18 @@
 #include "muza/buffer.hpp"
+#include <fftw3.h>
 #include <iostream>
 #include <stdexcept>
 namespace muza {
 Buffer::Buffer() : ready(true) {}
-Buffer::Buffer(int frames)
-    : frames(frames), samples(frames * 2, 0), ready(true) {}
 void Buffer::resize(int frames) {
   samples.resize(frames * 2, 0);
   this->frames = frames;
+  complex =
+      (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * samples.size());
+  fftForwardPlan = fftwf_plan_dft_r2c_1d(
+      samples.size(), (float *)samples.data(), complex, FFTW_ESTIMATE);
+  fftBackwardPlan = fftwf_plan_dft_c2r_1d(
+      samples.size(), complex, (float *)samples.data(), FFTW_ESTIMATE);
 }
 bool Buffer::isReady() { return ready.get(); }
 int Buffer::getFrames() { return frames; }
@@ -37,6 +42,14 @@ float &Buffer::operator[](int index) {
 void Buffer::print() {
   for (auto &sample : samples) {
     std::cout << sample << "\n";
+  }
+}
+void Buffer::fftTransform(fftTransformFuntcion function, void *userData) {
+  fftwf_execute(fftForwardPlan);
+  function(samples.size(), complex, userData);
+  fftwf_execute(fftBackwardPlan);
+  for (auto &sample : samples) {
+    sample /= 1024.0f;
   }
 }
 } // namespace muza
